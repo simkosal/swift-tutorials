@@ -30,7 +30,7 @@ class AuthServices {
       "phoneNumber": this.phoneNumber,
     };
     final header = {
-      "deviceId": await this.deviceInfoService.getDeviceId(),
+      // "deviceId": await this.deviceInfoService.getDeviceId(),
       "deviceModel": await this.deviceInfoService.getDeviceModel(),
       "X-APP-VERSION": await this.deviceInfoService.getAppVersion(),
       "X-API-KEY": this.apiKey,
