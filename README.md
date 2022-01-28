@@ -193,14 +193,58 @@ repeat {
 ### Arrays
 
 ### Declare array
+
+```swift
+var objs = [String]()
+objs.append("Sim")
+objs.append("Kosal")
+print(objs)
+print(objs.count) // length of arrays
+print(objs[0]) // print value index 0
+objs.remove(at:0) // removed value index0
+objs.removeAll() // removed all data array
+
+for ob in objs {
+  print(ob) // print all the value 
+}
+-------------------
+var numbers: [int] = [1,2,3,4,5]
+var employee: [String] = ["Ronaldo","Messi","Neymar"]
+```
+
 #### Inserting Data
 #### Retrieving Data
 
 
 ## Dictionaries
 
-#### Create Dictionary
-#### Initializing a Dictionary
+#### Create Dictionary && Initializing a Dictionary
+
+```swift
+// Declear dictionary
+var myDictionary = [String:String]
+
+// Assingning data into a dictionary
+myDictionary["key1"] = "Iphone 12"
+myDictionary["key2"] = "Iphone 13"
+
+// Retrieving a value as optionl String
+let myObj = myDictionary["key1"]
+let myObj = myDictionary["key2"]
+
+//Replace
+myDictionary["key1"] = "Iphone 12"
+
+// Remove
+myDictionary["key1"] = nil
+myDictionary["key2"] = nil
+
+// Loop through the items of the dictionary
+for (key,value) in myDictionary {
+  print(key)
+}
+
+```
 
 
 
