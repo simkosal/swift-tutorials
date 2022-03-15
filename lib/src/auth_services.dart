@@ -64,14 +64,10 @@ class AuthServices {
     required String pin,
     String? pid,
   }) async {
-    final header = {
-      "X-APP-VERSION": await this.deviceInfoService.getAppVersion(),
-    };
     final body = {"PID": pid ?? this.pid, "PIN": pin};
     Response response = await https!.post(
       '/api/signIn/confirmPIN',
       data: body,
-      options: Options(headers: header),
     );
     final authModel = AuthModel.fromJson(response.data);
     preferenceService.saveUser(authModel);
@@ -119,13 +115,8 @@ class AuthServices {
     required String pin,
     String? pid,
   }) async {
-    final header = {
-      "X-APP-VERSION": await this.deviceInfoService.getAppVersion(),
-    };
-
     final body = {"PID": pid ?? this.pid, "PIN": pin};
-    Response response = await https!.post('/api/signUp/confirmPIN',
-        data: body, options: Options(headers: header));
+    Response response = await https!.post('/api/signUp/confirmPIN', data: body);
     this.logger.debug("confirm pin Successfully");
     return ResponePinModel.fromJson(response.data);
   }
@@ -133,14 +124,9 @@ class AuthServices {
   /// sign up step 3 todo = get data form user and input with pid form step 2
   Future<AuthModel> setupUserProfile(
       {required String pid, @required User? userData}) async {
-    final header = {
-      "X-APP-VERSION": await this.deviceInfoService.getAppVersion(),
-    };
-
     final body = userData!.toJson();
     body.addAll({"refPID": pid});
-    Response response = await https!.post('/api/signUp/withPIN',
-        data: body, options: Options(headers: header));
+    Response response = await https!.post('/api/signUp/withPIN', data: body);
 
     final authModel = AuthModel.fromJson(response.data);
     preferenceService.saveUser(authModel);
@@ -172,12 +158,8 @@ class AuthServices {
       "photo": user.photo
     };
 
-    final header = {
-      "X-APP-VERSION": await this.deviceInfoService.getAppVersion(),
-    };
-
-    Response response = await https!.put("/api/secusers" + "/$id",
-        data: update, options: Options(headers: header));
+    Response response =
+        await https!.put("/api/secusers" + "/$id", data: update);
 
     final data = response.data["data"];
 
