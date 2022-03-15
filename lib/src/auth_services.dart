@@ -1,5 +1,6 @@
 import 'package:core_service/core_service.dart';
 import 'package:core_service/src/device_info_services.dart';
+import 'package:core_service/src/dio_options_service.dart';
 import 'package:core_service/src/model/request_pin_model.dart';
 import 'package:core_service/src/preferance.dart';
 import 'package:core_service/src/utils/logger.dart';
@@ -15,9 +16,10 @@ class AuthServices {
   String? pid;
   String? phoneNumber;
   final String? apiKey;
+  Map<String, String?>? extendHeaders;
 
   Logger logger = Logger("AuthServices");
-  AuthServices(this.https, {@required this.apiKey});
+  AuthServices({this.https, @required this.apiKey, this.extendHeaders});
 
   ///  sign in step 1 todo = request pin and get PID to confirm with pin in step 2
   Future<ResponePinModel> requestPinSignIn(String phoneNumber) async {
@@ -29,12 +31,12 @@ class AuthServices {
     final body = {
       "phoneNumber": this.phoneNumber,
     };
-    final header = {
-      // "deviceId": await this.deviceInfoService.getDeviceId(),
-      "deviceModel": await this.deviceInfoService.getDeviceModel(),
-      "X-APP-VERSION": await this.deviceInfoService.getAppVersion(),
-      "X-API-KEY": this.apiKey,
-    };
+    final header =
+        await DioOptionsService().getDioOptionsHeader(apiKey: this.apiKey);
+
+    if (extendHeaders != null) {
+      header.addAll(extendHeaders!);
+    }
 
     this.logger.debug("requestPinSignIn with header: $header with data: $body");
     Response response = await https!.post(
@@ -86,12 +88,13 @@ class AuthServices {
     final body = {
       "phoneNumber": phoneNumber,
     };
-    final header = {
-      // "deviceId": await this.deviceInfoService.getDeviceId(),
-      "deviceModel": await this.deviceInfoService.getDeviceModel(),
-      "X-APP-VERSION": await this.deviceInfoService.getAppVersion(),
-      "X-API-KEY": this.apiKey,
-    };
+    final header =
+        await DioOptionsService().getDioOptionsHeader(apiKey: this.apiKey);
+
+    if (extendHeaders != null) {
+      header.addAll(extendHeaders!);
+    }
+    this.logger.debug("requestPinSignIn with header: $header with data: $body");
 
     Response response = await https!.post(
       '/api/signUp/requestPIN',
