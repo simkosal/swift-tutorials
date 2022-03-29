@@ -22,7 +22,8 @@ class AuthServices {
   AuthServices({this.https, @required this.apiKey, this.extendHeaders});
 
   ///  sign in step 1 todo = request pin and get PID to confirm with pin in step 2
-  Future<ResponePinModel> requestPinSignIn(String phoneNumber) async {
+  Future<ResponePinModel> requestPinSignIn(
+      {required String phoneNumber, required String requestUri}) async {
     this.logger.debug("Phone before tranform $phoneNumber");
 
     final newPhone = KhmerPhoneValidator.validPhone(phoneNumber);
@@ -40,7 +41,7 @@ class AuthServices {
 
     this.logger.debug("requestPinSignIn with header: $header with data: $body");
     Response response = await https!.post(
-      '/api/signIn/requestPIN',
+      requestUri,
       data: body,
       options: Options(
         headers: header,
@@ -54,19 +55,20 @@ class AuthServices {
   }
 
   /// Retry request sign in pin again with old phone number
-  Future<ResponePinModel> retryRequestPinSignIn() async {
+  Future<ResponePinModel> retryRequestPinSignIn(String requestUri) async {
     this.logger.debug("retryRequestPinSignIn");
-    return await requestPinSignIn(this.phoneNumber ?? "");
+    return await requestPinSignIn(
+        phoneNumber: this.phoneNumber ?? "", requestUri: requestUri);
   }
 
   /// sign in step 2 todo = confirm and need customer to input the right pin and it save all user data and token in Preference
-  Future<dynamic> confirmPinSignIn({
-    required String pin,
-    String? pid,
-  }) async {
-    final body = {"PID": pid ?? this.pid, "PIN": pin};
+  Future<dynamic> confirmPinSignIn(
+      {required String pin,
+      required String pid,
+      required String requestUri}) async {
+    final body = {"PID": pid, "PIN": pin};
     Response response = await https!.post(
-      '/api/signIn/confirmPIN',
+      requestUri,
       data: body,
     );
     final authModel = AuthModel.fromJson(response.data);
@@ -77,7 +79,8 @@ class AuthServices {
   }
 
   /// sign up step 1 todo = request pin and get PID to confirm with pin in step 2
-  Future<ResponePinModel> requestPinSignUp(String phoneNumber) async {
+  Future<ResponePinModel> requestPinSignUp(
+      {required String phoneNumber, required String requestUri}) async {
     final newPhone = KhmerPhoneValidator.validPhone(phoneNumber);
 
     this.phoneNumber = newPhone.phone;
@@ -93,7 +96,7 @@ class AuthServices {
     this.logger.debug("requestPinSignIn with header: $header with data: $body");
 
     Response response = await https!.post(
-      '/api/signUp/requestPIN',
+      requestUri,
       data: body,
       options: Options(
         headers: header,
@@ -106,27 +109,30 @@ class AuthServices {
   }
 
   /// Retry request sign in pin again
-  Future<ResponePinModel> retryRequestPinSignUp() async {
-    return requestPinSignUp(this.phoneNumber ?? "");
+  Future<ResponePinModel> retryRequestPinSignUp(String requestUri) async {
+    return requestPinSignUp(
+        phoneNumber: this.phoneNumber ?? "", requestUri: requestUri);
   }
 
   /// sign up step 2 todo = get PID from step 1 and get customer pin number and it will return new PID to confirm and set user data in step3
-  Future<ResponePinModel> confirmPinSignUp({
-    required String pin,
-    String? pid,
-  }) async {
-    final body = {"PID": pid ?? this.pid, "PIN": pin};
-    Response response = await https!.post('/api/signUp/confirmPIN', data: body);
+  Future<ResponePinModel> confirmPinSignUp(
+      {required String pin,
+      required String pid,
+      required String requestUri}) async {
+    final body = {"PID": pid, "PIN": pin};
+    Response response = await https!.post(requestUri, data: body);
     this.logger.debug("confirm pin Successfully");
     return ResponePinModel.fromJson(response.data);
   }
 
   /// sign up step 3 todo = get data form user and input with pid form step 2
   Future<AuthModel> setupUserProfile(
-      {required String pid, @required User? userData}) async {
+      {required String pid,
+      @required User? userData,
+      required String requestUri}) async {
     final body = userData!.toJson();
     body.addAll({"refPID": pid});
-    Response response = await https!.post('/api/signUp/withPIN', data: body);
+    Response response = await https!.post(requestUri, data: body);
 
     final authModel = AuthModel.fromJson(response.data);
     preferenceService.saveUser(authModel);
@@ -136,8 +142,8 @@ class AuthServices {
   }
 
   /// Logout
-  Future logOut() async {
-    await https!.post('/api/v1/logout');
+  Future logOut({required String requestUri}) async {
+    await https!.post(requestUri);
     this.logger.debug("logout Successfully");
     preferenceService.removeUser();
   }
@@ -148,7 +154,7 @@ class AuthServices {
   }
 
   /// Update user profile
-  Future<User> updateUserProfile(User user, int id) async {
+  Future<User> updateUserProfile(User user, int id, String requestUri) async {
     final update = {
       "firstName": user.firstName,
       "lastName": user.lastName,
@@ -158,8 +164,7 @@ class AuthServices {
       "photo": user.photo
     };
 
-    Response response =
-        await https!.put("/api/secusers" + "/$id", data: update);
+    Response response = await https!.put(requestUri + "/$id", data: update);
 
     final data = response.data["data"];
 
@@ -178,10 +183,11 @@ class AuthServices {
   }
 
   /// Login with user and password
-  Future<AuthModel> login({String? username, String? password}) async {
+  Future<AuthModel> login(
+      {String? username, String? password, required String requestUri}) async {
     final body = {"username": username, 'password': password};
     this.logger.debug("login: $body");
-    final response = await https!.post('/api/v1/login', data: body);
+    final response = await https!.post(requestUri, data: body);
     final authModel = AuthModel.fromJson(response.data);
     preferenceService.saveUser(authModel);
     authModel.rawJson = response.data;
