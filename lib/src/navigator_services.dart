@@ -13,8 +13,7 @@ class NavigatorService {
   Future<dynamic> navigateTo(String routeName, {arg}) {
     this.logger.debug("pushNamed to $routeName with arg: $arg");
 
-    return _navigatorKey.currentState!
-        .pushNamed(routeName, arguments: routeName);
+    return _navigatorKey.currentState!.pushNamed(routeName, arguments: arg);
   }
 
   Future<dynamic> navigateReplaceTo(String routeName, {arg}) {
